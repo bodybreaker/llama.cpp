@@ -57,7 +57,14 @@ RUN apt-get update && \
     apt-get install -y libcurl4-openssl-dev libgomp1 curl
 
 COPY --from=build /app/llama-server /llama-server
+# PADDLER
+COPY --from=build /usr/local/bin/paddler /paddler
+
+# Auto Run
+COPY start-script.sh /start-script.sh
+RUN chmod +x /start-script.sh
 
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:8080/health" ]
 
-ENTRYPOINT [ "/llama-server" ]
+#ENTRYPOINT [ "/llama-server" ]
+ENTRYPOINT ["/bin/bash","/start-script.sh"]

@@ -1,0 +1,36 @@
+version: "3.4"
+
+networks:
+  llama_cpp:
+    driver: bridge
+
+services:
+  loadbalancer:
+    image: paddler:balancer
+    ports:
+      - "18080:8080"
+      - "18085:8085"
+    command: ["balancer","--management-host","loadbalancer","--management-port","8085","--reverseproxy-host","0.0.0.0","--reverseproxy-port","8080","--management-dashboard-enable","true"]
+    networks:
+      - llama_cpp
+  llama_cpp_server_1:
+    image: llama_cpp_paddler:server-cuda
+    ports:
+      - "7860:7860"
+    volumes:
+      - /home/itrnd/testgpt/text-generation-webui/models:/models
+    command: ["-m","models/gemma-2-2b-it-Q8_0.gguf","-c","65568","-np","8","--host","0.0.0.0","--port","7860","--n-gpu-layers","27"]
+    runtime: nvidia
+    networks:
+      - llama_cpp
+  llama_cpp_server_2:
+    image: llama_cpp_paddler:server-cuda
+    ports:
+      - "7862:7862"
+    volumes:
+      - /home/itrnd/testgpt/text-generation-webui/models:/models
+    command: ["-m","models/gemma-2-2b-it-Q8_0.gguf","-c","65568","-np","8","--host","0.0.0.0","--port","7862","--n-gpu-layers","27"]
+    runtime: nvidia
+    networks:
+      - llama_cpp
+
